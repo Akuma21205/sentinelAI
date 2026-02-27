@@ -13,6 +13,7 @@ Features:
 
 import json
 import logging
+import time
 import requests
 from typing import Dict, Any, List, Optional
 from core.config import GROQ_API_KEY
@@ -142,7 +143,7 @@ def _preprocess_scan_data(domain: str, assets: List[Dict[str, Any]]) -> Dict[str
 # ══════════════════════════════════════════════
 
 def _call_groq(system_prompt: str, user_prompt: str, temperature: float = 0.25) -> str:
-    """Call Groq API with structured prompts and timeout protection."""
+    """Call Groq API with structured prompts, timeout, and retry with backoff."""
     if not GROQ_API_KEY:
         raise Exception("GROQ_API_KEY is not configured")
 
@@ -161,29 +162,41 @@ def _call_groq(system_prompt: str, user_prompt: str, temperature: float = 0.25) 
         "max_tokens": 2048,
     }
 
-    logger.info("Calling Groq API (model=%s, temp=%.2f)", GROQ_MODEL, temperature)
+    max_retries = 2
+    backoff_base = 1.5
 
-    try:
-        response = requests.post(
-            GROQ_API_URL,
-            headers=headers,
-            json=payload,
-            timeout=GROQ_TIMEOUT_SECONDS,
-        )
-        response.raise_for_status()
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
-        logger.info("Groq API returned %d characters", len(content))
-        return content
-    except requests.Timeout:
-        logger.error("Groq API timed out after %ds", GROQ_TIMEOUT_SECONDS)
-        raise Exception(f"Groq API timed out after {GROQ_TIMEOUT_SECONDS}s")
-    except requests.RequestException as e:
-        logger.error("Groq API request failed: %s", str(e))
-        raise Exception(f"Groq API request failed: {str(e)}")
-    except (KeyError, IndexError):
-        logger.error("Unexpected response format from Groq API")
-        raise Exception("Unexpected response format from Groq API")
+    for attempt in range(max_retries + 1):
+        try:
+            logger.info("Groq API call attempt %d/%d (model=%s)", attempt + 1, max_retries + 1, GROQ_MODEL)
+            response = requests.post(
+                GROQ_API_URL,
+                headers=headers,
+                json=payload,
+                timeout=GROQ_TIMEOUT_SECONDS,
+            )
+            response.raise_for_status()
+            data = response.json()
+            content = data["choices"][0]["message"]["content"]
+            logger.info("Groq API returned %d characters", len(content))
+            return content
+        except requests.Timeout:
+            logger.warning("Groq API timeout (attempt %d)", attempt + 1)
+            if attempt < max_retries:
+                wait = backoff_base * (2 ** attempt)
+                logger.info("Retrying in %.1fs...", wait)
+                time.sleep(wait)
+            else:
+                raise Exception(f"Groq API timed out after {max_retries + 1} attempts")
+        except requests.RequestException as e:
+            logger.warning("Groq API request failed (attempt %d): %s", attempt + 1, str(e))
+            if attempt < max_retries:
+                wait = backoff_base * (2 ** attempt)
+                time.sleep(wait)
+            else:
+                raise Exception(f"Groq API failed after {max_retries + 1} attempts: {str(e)}")
+        except (KeyError, IndexError):
+            logger.error("Unexpected response format from Groq API")
+            raise Exception("Unexpected response format from Groq API")
 
 
 # ══════════════════════════════════════════════

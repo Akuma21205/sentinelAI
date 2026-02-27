@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getSummary, simulateAttack } from '../services/api';
 import AttackSimulation from './AttackSimulation';
+import PostureIntelligence from './PostureIntelligence';
 
 function AISummary({ scanId }) {
   const [summary, setSummary] = useState(null);
@@ -10,6 +11,7 @@ function AISummary({ scanId }) {
   const [summaryError, setSummaryError] = useState('');
   const [simulationError, setSimulationError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(true);
+  const [aiEnabled, setAiEnabled] = useState(true);
 
   const handleSummary = async () => {
     setLoadingSummary(true);
@@ -28,7 +30,7 @@ function AISummary({ scanId }) {
     setLoadingSimulation(true);
     setSimulationError('');
     try {
-      const data = await simulateAttack(scanId);
+      const data = await simulateAttack(scanId, !aiEnabled);
       setSimulation(data.attack_simulation || data);
     } catch (err) {
       setSimulationError(err.response?.data?.detail || 'Failed to simulate attack.');
@@ -52,15 +54,26 @@ function AISummary({ scanId }) {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-accent-hover" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 1 3 2 4l-5 5a2 2 0 1 0 3 3l5-5c1 1 2 2 4 2a4 4 0 0 0 0-8"/><path d="M15 9l3-3"/></svg>
-        <h3 className="text-sm font-semibold text-text-primary">AI Analysis</h3>
-        <span className="text-[9px] text-accent-hover bg-accent-muted px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wider">Powered by Groq</span>
+      {/* Header with AI toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-accent-hover" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 1 3 2 4l-5 5a2 2 0 1 0 3 3l5-5c1 1 2 2 4 2a4 4 0 0 0 0-8"/><path d="M15 9l3-3"/></svg>
+          <h3 className="text-sm font-semibold text-text-primary">AI Analysis</h3>
+        </div>
+        <button
+          onClick={() => setAiEnabled(!aiEnabled)}
+          className="flex items-center gap-2 text-[10px] font-medium text-text-muted hover:text-text-secondary transition-colors"
+        >
+          <span className="uppercase tracking-wider">AI Augmentation</span>
+          <div className={`relative w-8 h-4 rounded-full transition-colors duration-200 ${aiEnabled ? 'bg-accent/30' : 'bg-bg-elevated border border-border'}`}>
+            <div className={`absolute top-0.5 w-3 h-3 rounded-full transition-all duration-200 ${aiEnabled ? 'left-4.5 bg-accent-hover' : 'left-0.5 bg-text-muted/40'}`} style={{ left: aiEnabled ? '17px' : '2px' }} />
+          </div>
+          <span className={`text-[9px] font-mono ${aiEnabled ? 'text-accent-hover' : 'text-text-muted/50'}`}>{aiEnabled ? 'ON' : 'OFF'}</span>
+        </button>
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={handleSummary}
           disabled={loadingSummary}
@@ -79,8 +92,9 @@ function AISummary({ scanId }) {
           {loadingSimulation ? <Spinner /> : (
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           )}
-          {loadingSimulation ? 'Simulating...' : 'Attack Simulation'}
+          {loadingSimulation ? 'Simulating...' : `Attack Simulation${!aiEnabled ? ' (Deterministic)' : ''}`}
         </button>
+        <PostureIntelligence scanId={scanId} />
       </div>
 
       {/* Errors */}
@@ -148,7 +162,7 @@ function AISummary({ scanId }) {
         </div>
       )}
 
-      {/* Attack Simulation — structured visual component */}
+      {/* Attack Simulation */}
       {simulation && (
         <div className="glass-card rounded-xl p-5">
           <AttackSimulation simulation={simulation} />

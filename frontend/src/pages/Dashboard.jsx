@@ -102,21 +102,43 @@ function Dashboard() {
         <SummaryCards total={scanData?.total_assets || 0} counts={severityCounts} avgRisk={avgRisk} />
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up stagger-2" style={{opacity:0}}>
-        <RiskChart counts={severityCounts} />
-        <HeatmapGrid assets={assets} />
-      </div>
+      {/* Empty State — 0 assets */}
+      {assets.length === 0 ? (
+        <div className="glass-card rounded-xl p-12 text-center animate-fade-in-up stagger-2" style={{opacity:0}}>
+          <div className="w-16 h-16 rounded-2xl bg-low/10 border border-low/20 flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-low" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <polyline points="9 12 11 14 15 10"/>
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-text-primary mb-2">Minimal Public Attack Surface Detected</h3>
+          <p className="text-text-muted text-sm max-w-md mx-auto leading-relaxed">
+            No discoverable assets with notable exposure were identified for <span className="font-mono text-cyan">{scanData?.domain}</span>.
+            This may indicate strong perimeter controls or limited public footprint.
+          </p>
+          <p className="text-text-muted/50 text-xs mt-4">
+            Consider rescanning with broader scope or verifying DNS configuration.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up stagger-2" style={{opacity:0}}>
+            <RiskChart counts={severityCounts} />
+            <HeatmapGrid assets={assets} />
+          </div>
 
-      {/* Assets Table */}
-      <div className="animate-fade-in-up stagger-3" style={{opacity:0}}>
-        <AssetsTable assets={assets} />
-      </div>
+          {/* Assets Table */}
+          <div className="animate-fade-in-up stagger-3" style={{opacity:0}}>
+            <AssetsTable assets={assets} />
+          </div>
 
-      {/* AI Section */}
-      <div className="animate-fade-in-up stagger-4" style={{opacity:0}}>
-        <AISummary scanId={scanId} />
-      </div>
+          {/* AI Section */}
+          <div className="animate-fade-in-up stagger-4" style={{opacity:0}}>
+            <AISummary scanId={scanId} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

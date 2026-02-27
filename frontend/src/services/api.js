@@ -25,8 +25,13 @@ export async function getSummary(scanId) {
     return response.data;
 }
 
-export async function simulateAttack(scanId) {
-    const response = await api.post('/simulate', { scan_id: scanId });
+export async function simulateAttack(scanId, deterministicOnly = false) {
+    const response = await api.post('/simulate', { scan_id: scanId, deterministic_only: deterministicOnly });
+    return response.data;
+}
+
+export async function getPosture(scanId) {
+    const response = await api.post('/posture', { scan_id: scanId });
     return response.data;
 }
 
