@@ -40,6 +40,7 @@ def save_scan(domain: str, assets: list, total_assets: int) -> Dict[str, Any]:
             "high": sum(1 for a in assets if a.get("severity") == "High"),
             "medium": sum(1 for a in assets if a.get("severity") == "Medium"),
             "low": sum(1 for a in assets if a.get("severity") == "Low"),
+            "informational": sum(1 for a in assets if a.get("severity") == "Informational"),
         },
     }
 

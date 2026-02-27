@@ -14,7 +14,7 @@ class AIRequest(BaseModel):
 def get_summary(request: AIRequest):
     """
     Generate an AI-powered executive summary for a completed scan.
-    Uses Groq API to analyze scan results and provide insights.
+    Uses preprocessed structured data + Groq API for accurate analysis.
     """
     scan = get_scan(request.scan_id)
     if not scan:
@@ -25,17 +25,21 @@ def get_summary(request: AIRequest):
             domain=scan["domain"],
             assets=scan["assets"],
         )
+        return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI summary generation failed: {str(e)}")
-
-    return result
+        # Structured fallback instead of raw 500
+        return {
+            "summary": f"AI analysis unavailable: {str(e)}",
+            "top_risks": ["Unable to generate risk analysis — AI service error"],
+            "recommendations": ["Retry analysis or review scan results manually"],
+        }
 
 
 @router.post("/simulate")
 def simulate_attack(request: AIRequest):
     """
     Generate a simulated attack chain based on scan results.
-    Uses Groq API to create a realistic penetration testing narrative.
+    Only considers assets with risk_score >= 30.
     """
     scan = get_scan(request.scan_id)
     if not scan:
@@ -46,7 +50,9 @@ def simulate_attack(request: AIRequest):
             domain=scan["domain"],
             assets=scan["assets"],
         )
+        return {"attack_simulation": simulation}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Attack simulation failed: {str(e)}")
-
-    return {"attack_simulation": simulation}
+        # Structured fallback
+        return {
+            "attack_simulation": f"Attack simulation unavailable: {str(e)}. Please retry or review scan data manually."
+        }
