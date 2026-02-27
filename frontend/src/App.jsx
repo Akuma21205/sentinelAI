@@ -1,13 +1,31 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import ScanPage from './pages/ScanPage';
 import Dashboard from './pages/Dashboard';
 
-function App() {
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      className="w-8 h-8 rounded-lg bg-bg-card border border-border flex items-center justify-center hover:bg-bg-card-hover transition-colors"
+      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    >
+      {theme === 'dark' ? (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      )}
+    </button>
+  );
+}
+
+function AppContent() {
   return (
     <Router>
-      <div className="min-h-screen bg-bg-primary grid-bg">
+      <div className="min-h-screen bg-bg-primary grid-bg transition-colors duration-300">
         {/* Nav */}
-        <nav className="border-b border-border bg-bg-secondary/70 backdrop-blur-xl sticky top-0 z-50">
+        <nav className="border-b border-border bg-bg-secondary/70 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
           <div className="max-w-[1400px] mx-auto px-6 h-14 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/25 flex items-center justify-center group-hover:bg-accent/25 transition-colors">
@@ -19,9 +37,12 @@ function App() {
                 Sentinel<span className="text-accent-hover">AI</span>
               </span>
             </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-low animate-pulse-dot" />
-              <span className="text-xs text-text-muted font-medium">System Online</span>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-low animate-pulse-dot" />
+                <span className="text-xs text-text-muted font-medium">System Online</span>
+              </div>
             </div>
           </div>
         </nav>
@@ -35,6 +56,14 @@ function App() {
         </main>
       </div>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

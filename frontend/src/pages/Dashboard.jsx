@@ -69,6 +69,10 @@ function Dashboard() {
     Low: assets.filter(a => a.severity === 'Low').length,
   };
 
+  const avgRisk = assets.length > 0
+    ? Math.round(assets.reduce((sum, a) => sum + (a.risk_score || 0), 0) / assets.length)
+    : 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -95,7 +99,7 @@ function Dashboard() {
 
       {/* Summary Cards */}
       <div className="animate-fade-in-up stagger-1" style={{opacity:0}}>
-        <SummaryCards total={scanData?.total_assets || 0} counts={severityCounts} />
+        <SummaryCards total={scanData?.total_assets || 0} counts={severityCounts} avgRisk={avgRisk} />
       </div>
 
       {/* Charts Row */}

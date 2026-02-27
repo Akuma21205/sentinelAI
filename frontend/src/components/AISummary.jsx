@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getSummary, simulateAttack } from '../services/api';
+import AttackSimulation from './AttackSimulation';
 
 function AISummary({ scanId }) {
   const [summary, setSummary] = useState(null);
@@ -9,7 +10,6 @@ function AISummary({ scanId }) {
   const [summaryError, setSummaryError] = useState('');
   const [simulationError, setSimulationError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(true);
-  const [simulationOpen, setSimulationOpen] = useState(true);
 
   const handleSummary = async () => {
     setLoadingSummary(true);
@@ -29,7 +29,7 @@ function AISummary({ scanId }) {
     setSimulationError('');
     try {
       const data = await simulateAttack(scanId);
-      setSimulation(data);
+      setSimulation(data.attack_simulation || data);
     } catch (err) {
       setSimulationError(err.response?.data?.detail || 'Failed to simulate attack.');
     } finally {
@@ -148,26 +148,10 @@ function AISummary({ scanId }) {
         </div>
       )}
 
-      {/* Attack Simulation */}
+      {/* Attack Simulation — structured visual component */}
       {simulation && (
-        <div className="glass-card rounded-xl overflow-hidden animate-fade-in-up">
-          <button
-            onClick={() => setSimulationOpen(!simulationOpen)}
-            className="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-bg-card-hover/30 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-critical animate-pulse-dot" />
-              <h4 className="text-xs font-semibold text-text-primary uppercase tracking-wider">Attack Simulation</h4>
-            </div>
-            <ChevronIcon open={simulationOpen} />
-          </button>
-          {simulationOpen && (
-            <div className="px-5 pb-5 border-t border-border/50">
-              <pre className="text-xs text-text-secondary whitespace-pre-wrap leading-relaxed font-sans pt-4">
-                {simulation.attack_simulation}
-              </pre>
-            </div>
-          )}
+        <div className="glass-card rounded-xl p-5">
+          <AttackSimulation simulation={simulation} />
         </div>
       )}
     </div>

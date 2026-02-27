@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 from collections import Counter
 from recon.subdomain import fetch_subdomains
-from recon.resolver import resolve_domain
+from recon.resolver import resolve_domain, clear_dns_cache
 from recon.shodan_scan import scan_ip, clear_cache
 from services.risk_service import calculate_risk, apply_global_posture_adjustment
 
@@ -17,8 +17,9 @@ def run_recon(domain: str) -> List[Dict[str, Any]]:
     6. Apply global posture adjustment (Layer 4)
     Returns a list of enriched asset dictionaries.
     """
-    # Clear Shodan cache from any previous scan
+    # Clear caches from any previous scan
     clear_cache()
+    clear_dns_cache()
 
     subdomains = fetch_subdomains(domain)
 

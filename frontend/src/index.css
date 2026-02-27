@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
 
 @theme {
   --color-bg-primary: #06090f;
@@ -33,6 +33,39 @@
   --color-cyan-glow: #06b6d430;
 }
 
+/* ─── Light Mode Override ─── */
+.light {
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #f1f5f9;
+  --color-bg-elevated: #e2e8f0;
+
+  --color-border: #e2e8f0;
+  --color-border-light: #cbd5e1;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+
+  --color-critical: #dc2626;
+  --color-critical-glow: #dc262620;
+  --color-high: #ea580c;
+  --color-high-glow: #ea580c20;
+  --color-medium: #ca8a04;
+  --color-medium-glow: #ca8a0420;
+  --color-low: #16a34a;
+  --color-low-glow: #16a34a20;
+
+  --color-accent: #4f46e5;
+  --color-accent-hover: #6366f1;
+  --color-accent-glow: #4f46e520;
+  --color-accent-muted: #4f46e515;
+
+  --color-cyan: #0891b2;
+  --color-cyan-glow: #0891b220;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -46,6 +79,7 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 ::-webkit-scrollbar {
@@ -57,7 +91,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #293548;
+  background: var(--color-border-light);
   border-radius: 10px;
 }
 
@@ -162,11 +196,23 @@ body {
   background-size: 40px 40px;
 }
 
+.light .grid-bg {
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+}
+
 /* Glass card */
 .glass-card {
   background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(17, 24, 39, 0.6) 100%);
   backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.light .glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* Mono font utility */
