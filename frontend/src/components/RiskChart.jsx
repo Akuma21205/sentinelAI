@@ -1,18 +1,18 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const COLORS = {
-  Critical: '#ff4757',
-  High: '#ff6b35',
-  Medium: '#ffc312',
-  Low: '#2ed573',
+  Critical: '#D94F4F',
+  High: '#D97B4F',
+  Medium: '#C9A84F',
+  Low: '#4FAF7B',
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-strong rounded-xl px-4 py-2.5 shadow-xl border border-border-light">
-      <p className="text-text-primary text-xs font-bold">{label}</p>
-      <p className="text-text-muted text-[10px] mt-0.5">{payload[0].value} assets</p>
+    <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '10px 14px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
+      <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{label}</p>
+      <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{payload[0].value} assets</p>
     </div>
   );
 };
@@ -26,32 +26,35 @@ function RiskChart({ counts }) {
   ];
 
   return (
-    <div className="glass rounded-2xl p-6">
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-accent-hover" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+    <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '28px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+        <div
+          className="flex items-center justify-center"
+          style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(196,120,91,0.08)' }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" style={{ width: '16px', height: '16px', color: 'var(--color-accent)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
         </div>
-        <h3 className="text-sm font-bold text-text-primary">Risk Distribution</h3>
+        <h3 style={{ fontSize: '15px', fontWeight: 700 }} className="text-text-primary">Risk Distribution</h3>
       </div>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={data} margin={{ top: 0, right: 5, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
           <XAxis
             dataKey="name"
-            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
+            tick={{ fill: 'var(--color-text-muted)', fontSize: 11, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#64748b', fontSize: 10 }}
+            tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             allowDecimals={false}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124,58,237,0.04)' }} />
-          <Bar dataKey="count" radius={[10, 10, 4, 4]} barSize={40}>
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(196,120,91,0.04)' }} />
+          <Bar dataKey="count" radius={[8, 8, 4, 4]} barSize={44}>
             {data.map((entry) => (
-              <Cell key={entry.name} fill={COLORS[entry.name]} fillOpacity={0.8} />
+              <Cell key={entry.name} fill={COLORS[entry.name]} fillOpacity={0.75} />
             ))}
           </Bar>
         </BarChart>

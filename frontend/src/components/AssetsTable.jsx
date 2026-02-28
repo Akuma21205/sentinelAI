@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
 const SEVERITY_CHIP = {
-  Critical: 'chip-critical',
-  High: 'chip-high',
-  Medium: 'chip-medium',
-  Low: 'chip-low',
-  Informational: 'bg-bg-elevated/50 text-text-muted border border-border',
+  Critical: { bg: 'rgba(217,79,79,0.08)', color: '#D94F4F', border: 'rgba(217,79,79,0.15)' },
+  High:     { bg: 'rgba(217,123,79,0.08)', color: '#D97B4F', border: 'rgba(217,123,79,0.15)' },
+  Medium:   { bg: 'rgba(201,168,79,0.08)', color: '#C9A84F', border: 'rgba(201,168,79,0.15)' },
+  Low:      { bg: 'rgba(79,175,123,0.08)', color: '#4FAF7B', border: 'rgba(79,175,123,0.15)' },
+  Informational: { bg: 'var(--color-bg-secondary)', color: 'var(--color-text-muted)', border: 'var(--color-border)' },
 };
 
 function AssetsTable({ assets }) {
@@ -13,32 +13,53 @@ function AssetsTable({ assets }) {
 
   if (!assets || assets.length === 0) {
     return (
-      <div className="glass rounded-2xl p-10 text-center">
-        <p className="text-text-muted text-xs">No assets discovered.</p>
+      <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '48px', textAlign: 'center' }}>
+        <p className="text-text-muted" style={{ fontSize: '13px' }}>No assets discovered.</p>
       </div>
     );
   }
 
+  const thStyle = {
+    textAlign: 'left',
+    padding: '14px 24px',
+    fontSize: '10px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    fontWeight: 700,
+    color: 'var(--color-text-muted)',
+  };
+
   return (
-    <div className="glass rounded-2xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-accent-hover" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '16px', overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div
+            className="flex items-center justify-center"
+            style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(196,120,91,0.08)' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" style={{ width: '16px', height: '16px', color: 'var(--color-accent)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
           </div>
-          <h3 className="text-sm font-bold text-text-primary">Discovered Assets</h3>
+          <h3 style={{ fontSize: '15px', fontWeight: 700 }} className="text-text-primary">Discovered Assets</h3>
         </div>
-        <span className="text-[11px] text-text-muted font-mono px-2.5 py-1 bg-accent/5 rounded-full border border-accent/10">{assets.length} found</span>
+        <span
+          className="font-mono text-text-muted"
+          style={{ fontSize: '12px', padding: '4px 12px', borderRadius: '9999px', backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
+        >
+          {assets.length} found
+        </span>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
+
+      {/* Table */}
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left px-6 py-3 text-text-muted text-[9px] uppercase tracking-[0.15em] font-bold">Subdomain</th>
-              <th className="text-left px-6 py-3 text-text-muted text-[9px] uppercase tracking-[0.15em] font-bold">IP Address</th>
-              <th className="text-left px-6 py-3 text-text-muted text-[9px] uppercase tracking-[0.15em] font-bold">Ports</th>
-              <th className="text-left px-6 py-3 text-text-muted text-[9px] uppercase tracking-[0.15em] font-bold">Risk</th>
-              <th className="text-left px-6 py-3 text-text-muted text-[9px] uppercase tracking-[0.15em] font-bold">Severity</th>
+            <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+              <th style={thStyle}>Subdomain</th>
+              <th style={thStyle}>IP Address</th>
+              <th style={thStyle}>Ports</th>
+              <th style={thStyle}>Risk</th>
+              <th style={thStyle}>Severity</th>
             </tr>
           </thead>
           <tbody>
@@ -47,36 +68,66 @@ function AssetsTable({ assets }) {
               const isExpanded = expandedRow === idx;
               const visiblePorts = isExpanded ? ports : ports.slice(0, 5);
               const hasMore = ports.length > 5;
+              const chipStyle = SEVERITY_CHIP[asset.severity] || SEVERITY_CHIP.Low;
 
               return (
                 <tr
                   key={idx}
-                  className={`border-b border-border/40 transition-colors hover:bg-white/[0.02] ${hasMore ? 'cursor-pointer' : ''}`}
                   onClick={() => hasMore && setExpandedRow(isExpanded ? null : idx)}
+                  style={{
+                    borderBottom: '1px solid var(--color-border)',
+                    cursor: hasMore ? 'pointer' : 'default',
+                    transition: 'background-color 0.15s ease',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                 >
-                  <td className="px-6 py-3.5 font-mono text-accent-hover text-xs">{asset.subdomain}</td>
-                  <td className="px-6 py-3.5 font-mono text-text-muted text-xs">{asset.ip}</td>
-                  <td className="px-6 py-3.5">
-                    <div className="flex flex-wrap gap-1 items-center">
+                  <td className="font-mono text-accent" style={{ padding: '16px 24px', fontSize: '13px' }}>{asset.subdomain}</td>
+                  <td className="font-mono text-text-muted" style={{ padding: '16px 24px', fontSize: '13px' }}>{asset.ip}</td>
+                  <td style={{ padding: '16px 24px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
                       {visiblePorts.length > 0 ? (
                         <>
                           {visiblePorts.map((p) => (
-                            <span key={p} className="px-1.5 py-0.5 bg-bg-elevated/40 text-text-secondary rounded-md text-[10px] font-mono border border-border/50">{p}</span>
+                            <span
+                              key={p}
+                              className="font-mono"
+                              style={{ padding: '2px 8px', backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', borderRadius: '6px', fontSize: '11px', color: 'var(--color-text-secondary)' }}
+                            >
+                              {p}
+                            </span>
                           ))}
                           {hasMore && !isExpanded && (
-                            <span className="px-1.5 py-0.5 bg-accent/10 text-accent-hover rounded-md text-[10px] font-mono border border-accent/15">+{ports.length - 5}</span>
+                            <span
+                              className="font-mono"
+                              style={{ padding: '2px 8px', backgroundColor: 'rgba(196,120,91,0.06)', border: '1px solid rgba(196,120,91,0.12)', borderRadius: '6px', fontSize: '11px', color: 'var(--color-accent)' }}
+                            >
+                              +{ports.length - 5}
+                            </span>
                           )}
                         </>
                       ) : (
-                        <span className="text-text-muted/50 text-xs">—</span>
+                        <span className="text-text-muted" style={{ fontSize: '13px' }}>—</span>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-3.5">
-                    <span className="text-base font-black text-text-primary">{asset.risk_score}</span>
+                  <td style={{ padding: '16px 24px' }}>
+                    <span style={{ fontSize: '16px', fontWeight: 800 }} className="text-text-primary">{asset.risk_score}</span>
                   </td>
-                  <td className="px-6 py-3.5">
-                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider ${SEVERITY_CHIP[asset.severity] || SEVERITY_CHIP.Low}`}>
+                  <td style={{ padding: '16px 24px' }}>
+                    <span
+                      style={{
+                        padding: '4px 12px',
+                        borderRadius: '9999px',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        backgroundColor: chipStyle.bg,
+                        color: chipStyle.color,
+                        border: `1px solid ${chipStyle.border}`,
+                      }}
+                    >
                       {asset.severity}
                     </span>
                   </td>

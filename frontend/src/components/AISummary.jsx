@@ -3,14 +3,16 @@ import { getSummary, simulateAttack } from '../services/api';
 import AttackSimulation from './AttackSimulation';
 import PostureIntelligence from './PostureIntelligence';
 
+const TABS = ['Executive Summary', 'Attack Simulation', 'Strategic Intelligence'];
+
 function AISummary({ scanId }) {
+  const [activeTab, setActiveTab] = useState(0);
   const [summary, setSummary] = useState(null);
   const [simulation, setSimulation] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [loadingSimulation, setLoadingSimulation] = useState(false);
   const [summaryError, setSummaryError] = useState('');
   const [simulationError, setSimulationError] = useState('');
-  const [summaryOpen, setSummaryOpen] = useState(true);
   const [aiEnabled, setAiEnabled] = useState(true);
 
   const handleSummary = async () => {
@@ -40,104 +42,185 @@ function AISummary({ scanId }) {
   };
 
   const Spinner = () => (
-    <div className="relative w-3.5 h-3.5">
-      <div className="absolute inset-0 rounded-full border-2 border-current/20" />
-      <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-current animate-spin" />
+    <div style={{ position: 'relative', width: '14px', height: '14px' }}>
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid var(--color-border)' }} />
+      <div className="animate-spin" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'currentColor' }} />
     </div>
   );
 
   return (
-    <div className="space-y-4">
-      {/* Header row */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-          <span className="gradient-text text-base">✦</span>
-          Intelligence
-        </h3>
+    <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '16px', overflow: 'hidden' }}>
+      {/* Header with tab bar and AI toggle */}
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span className="text-accent" style={{ fontSize: '16px' }}>✦</span>
+          <h3 style={{ fontSize: '15px', fontWeight: 700 }} className="text-text-primary">Intelligence</h3>
+        </div>
+
+        {/* AI Toggle — minimal switch */}
         <button
           onClick={() => setAiEnabled(!aiEnabled)}
-          className="flex items-center gap-2.5 text-[10px] font-bold text-text-muted hover:text-text-secondary transition-colors"
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', border: 'none', background: 'none', padding: 0 }}
         >
-          <span className="uppercase tracking-[0.15em]">AI Augmentation</span>
-          <div className={`relative w-8 h-4 rounded-full transition-all duration-300 ${aiEnabled ? 'bg-gradient-to-r from-accent to-purple shadow-[0_0_12px_rgba(124,58,237,0.3)]' : 'bg-bg-elevated border border-border'}`}>
-            <div className={`absolute top-[2px] w-3 h-3 rounded-full bg-white transition-all duration-300 ${aiEnabled ? 'left-[18px] shadow-md' : 'left-[2px] opacity-50'}`} />
+          <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }} className="text-text-muted">AI Augmentation</span>
+          <div style={{
+            position: 'relative', width: '36px', height: '20px', borderRadius: '10px',
+            backgroundColor: aiEnabled ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+            border: aiEnabled ? 'none' : '1px solid var(--color-border)',
+            transition: 'all 0.2s ease',
+          }}>
+            <div style={{
+              position: 'absolute', top: '3px', width: '14px', height: '14px', borderRadius: '50%',
+              backgroundColor: 'white',
+              left: aiEnabled ? '19px' : '3px',
+              transition: 'left 0.2s ease',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            }} />
           </div>
-          <span className={`text-[9px] font-mono font-black ${aiEnabled ? 'text-accent-hover' : 'text-text-muted/30'}`}>{aiEnabled ? 'ON' : 'OFF'}</span>
+          <span className="font-mono" style={{ fontSize: '10px', fontWeight: 800, color: aiEnabled ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
+            {aiEnabled ? 'ON' : 'OFF'}
+          </span>
         </button>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={handleSummary}
-          disabled={loadingSummary}
-          className="px-4 py-2.5 bg-gradient-to-r from-accent/15 to-accent/5 hover:from-accent/25 hover:to-accent/10 text-accent-hover text-xs font-bold rounded-xl border border-accent/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-2 hover:shadow-[0_0_20px_rgba(124,58,237,0.1)]"
-        >
-          {loadingSummary ? <Spinner /> : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          )}
-          {loadingSummary ? 'Generating...' : 'Executive Summary'}
-        </button>
-        <button
-          onClick={handleSimulation}
-          disabled={loadingSimulation}
-          className="px-4 py-2.5 bg-gradient-to-r from-critical/15 to-critical/5 hover:from-critical/25 hover:to-critical/10 text-critical text-xs font-bold rounded-xl border border-critical/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-2 hover:shadow-[0_0_20px_rgba(255,71,87,0.1)]"
-        >
-          {loadingSimulation ? <Spinner /> : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          )}
-          {loadingSimulation ? 'Simulating...' : `Attack Simulation${!aiEnabled ? ' (Det.)' : ''}`}
-        </button>
-        <PostureIntelligence scanId={scanId} />
-      </div>
-
-      {/* Errors */}
-      {summaryError && <div className="px-4 py-2.5 glass rounded-xl chip-critical text-xs"><span className="font-bold">Error: </span>{summaryError}</div>}
-      {simulationError && <div className="px-4 py-2.5 glass rounded-xl chip-critical text-xs"><span className="font-bold">Error: </span>{simulationError}</div>}
-
-      {/* Executive Summary */}
-      {summary && (
-        <div className="glass rounded-2xl overflow-hidden animate-fade-up">
-          <button onClick={() => setSummaryOpen(!summaryOpen)} className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-            <h4 className="text-xs font-bold text-text-primary uppercase tracking-[0.15em]">Executive Summary</h4>
-            <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 text-text-muted transition-transform duration-300 ${summaryOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      {/* Segmented Tab Bar */}
+      <div style={{ padding: '16px 24px 0', display: 'flex', gap: '4px', backgroundColor: 'var(--color-bg-primary)' }}>
+        {TABS.map((tab, i) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(i)}
+            style={{
+              padding: '10px 20px',
+              fontSize: '12px',
+              fontWeight: activeTab === i ? 700 : 500,
+              borderRadius: '8px 8px 0 0',
+              border: activeTab === i ? '1px solid var(--color-border)' : '1px solid transparent',
+              borderBottom: activeTab === i ? '1px solid white' : '1px solid transparent',
+              backgroundColor: activeTab === i ? 'white' : 'transparent',
+              color: activeTab === i ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              position: 'relative',
+              bottom: '-1px',
+            }}
+          >
+            {tab}
           </button>
-          {summaryOpen && (
-            <div className="px-6 pb-6 space-y-4 border-t border-border">
-              <p className="text-text-secondary text-sm leading-relaxed pt-4">{summary.summary}</p>
+        ))}
+      </div>
 
-              {summary.top_risks?.length > 0 && (
-                <div className="bg-gradient-to-r from-critical/8 to-transparent rounded-xl p-4 border border-critical/10">
-                  <h5 className="text-[9px] uppercase tracking-[0.15em] text-critical font-black mb-2.5">Top Risks</h5>
-                  <ul className="space-y-2">
-                    {summary.top_risks.map((risk, i) => (
-                      <li key={i} className="text-xs text-text-secondary leading-relaxed pl-3 border-l-2 border-critical/20">{risk}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+      {/* Tab Content */}
+      <div style={{ padding: '28px 24px', borderTop: '1px solid var(--color-border)' }}>
 
-              {summary.recommendations?.length > 0 && (
-                <div className="bg-gradient-to-r from-low/8 to-transparent rounded-xl p-4 border border-low/10">
-                  <h5 className="text-[9px] uppercase tracking-[0.15em] text-low font-black mb-2.5">Recommendations</h5>
-                  <ul className="space-y-2">
-                    {summary.recommendations.map((rec, i) => (
-                      <li key={i} className="text-xs text-text-secondary leading-relaxed pl-3 border-l-2 border-low/20">{rec}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+        {/* ─── Tab 0: Executive Summary ─── */}
+        {activeTab === 0 && (
+          <div>
+            {!summary && !loadingSummary && !summaryError && (
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <p className="text-text-muted" style={{ fontSize: '14px', marginBottom: '20px' }}>Generate an AI-powered executive summary of the scan results.</p>
+                <button
+                  onClick={handleSummary}
+                  disabled={loadingSummary}
+                  className="btn-accent disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{ padding: '12px 28px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" style={{ width: '14px', height: '14px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Generate Summary
+                </button>
+              </div>
+            )}
 
-      {/* Attack Simulation */}
-      {simulation && (
-        <div className="glass rounded-2xl p-6">
-          <AttackSimulation simulation={simulation} />
-        </div>
-      )}
+            {loadingSummary && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '40px 0' }}>
+                <Spinner />
+                <span className="text-text-muted" style={{ fontSize: '14px' }}>Generating executive summary...</span>
+              </div>
+            )}
+
+            {summaryError && (
+              <div style={{ padding: '12px 16px', borderRadius: '10px', border: '1px solid rgba(217,79,79,0.15)', backgroundColor: 'rgba(217,79,79,0.04)', fontSize: '13px' }} className="text-critical">
+                <span style={{ fontWeight: 700 }}>Error: </span>{summaryError}
+              </div>
+            )}
+
+            {summary && (
+              <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Overview */}
+                <p className="text-text-secondary" style={{ fontSize: '14px', lineHeight: 1.7 }}>{summary.summary}</p>
+
+                {/* Top Risks */}
+                {summary.top_risks?.length > 0 && (
+                  <div style={{ backgroundColor: 'rgba(217,79,79,0.04)', border: '1px solid rgba(217,79,79,0.1)', borderRadius: '12px', padding: '20px' }}>
+                    <h5 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800, color: 'var(--color-critical)', marginBottom: '12px' }}>Top Risks</h5>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: '8px', listStyle: 'none', padding: 0, margin: 0 }}>
+                      {summary.top_risks.map((risk, i) => (
+                        <li key={i} style={{ fontSize: '13px', lineHeight: 1.6, paddingLeft: '14px', borderLeft: '2px solid rgba(217,79,79,0.2)' }} className="text-text-secondary">{risk}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Recommendations */}
+                {summary.recommendations?.length > 0 && (
+                  <div style={{ backgroundColor: 'rgba(79,175,123,0.04)', border: '1px solid rgba(79,175,123,0.1)', borderRadius: '12px', padding: '20px' }}>
+                    <h5 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800, color: 'var(--color-low)', marginBottom: '12px' }}>Recommendations</h5>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: '8px', listStyle: 'none', padding: 0, margin: 0 }}>
+                      {summary.recommendations.map((rec, i) => (
+                        <li key={i} style={{ fontSize: '13px', lineHeight: 1.6, paddingLeft: '14px', display: 'flex', alignItems: 'flex-start', gap: '8px' }} className="text-text-secondary">
+                          <span style={{ color: 'var(--color-low)', fontWeight: 700, flexShrink: 0 }}>✓</span>
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── Tab 1: Attack Simulation ─── */}
+        {activeTab === 1 && (
+          <div>
+            {!simulation && !loadingSimulation && !simulationError && (
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <p className="text-text-muted" style={{ fontSize: '14px', marginBottom: '20px' }}>
+                  Simulate MITRE ATT&CK–mapped attack paths{!aiEnabled ? ' (deterministic only)' : ''}.
+                </p>
+                <button
+                  onClick={handleSimulation}
+                  disabled={loadingSimulation}
+                  className="btn-accent disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{ padding: '12px 28px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" style={{ width: '14px', height: '14px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  Run Simulation
+                </button>
+              </div>
+            )}
+
+            {loadingSimulation && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '40px 0' }}>
+                <Spinner />
+                <span className="text-text-muted" style={{ fontSize: '14px' }}>Running attack simulation...</span>
+              </div>
+            )}
+
+            {simulationError && (
+              <div style={{ padding: '12px 16px', borderRadius: '10px', border: '1px solid rgba(217,79,79,0.15)', backgroundColor: 'rgba(217,79,79,0.04)', fontSize: '13px' }} className="text-critical">
+                <span style={{ fontWeight: 700 }}>Error: </span>{simulationError}
+              </div>
+            )}
+
+            {simulation && <AttackSimulation simulation={simulation} />}
+          </div>
+        )}
+
+        {/* ─── Tab 2: Strategic Intelligence ─── */}
+        {activeTab === 2 && (
+          <PostureIntelligence scanId={scanId} />
+        )}
+      </div>
     </div>
   );
 }
